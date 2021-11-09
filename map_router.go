@@ -1,7 +1,6 @@
 package mux
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 )
@@ -10,6 +9,7 @@ var _ Handler = &HandlerBasedOnMap{}
 
 type HandlerBasedOnMap struct {
 	handlers sync.Map
+	BaseHandler
 }
 
 func (h *HandlerBasedOnMap) ServeHTTP(c *Context) {
@@ -25,13 +25,9 @@ func (h *HandlerBasedOnMap) ServeHTTP(c *Context) {
 	handler.(HandlerFunc)(c)
 }
 
-func (h *HandlerBasedOnMap) Route(method string, pattern string, handlerFunc HandlerFunc) {
+func (h *HandlerBasedOnMap) Route(method, pattern string, handlerFunc HandlerFunc) {
 	key := h.key(method, pattern)
 	h.handlers.Store(key, handlerFunc)
-}
-
-func (h *HandlerBasedOnMap) key(method string, path string) string {
-	return fmt.Sprintf("%s-%s", method, path)
 }
 
 func NewHandlerBasedOnMap() *HandlerBasedOnMap {

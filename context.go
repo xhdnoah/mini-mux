@@ -11,6 +11,7 @@ type H map[string]interface{}
 type Context struct {
 	Writer     http.ResponseWriter
 	Request    *http.Request
+	Params     map[string]string
 	StatusCode int
 }
 

@@ -36,7 +36,7 @@ func (s *miniHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewMiniHTTPServer(name string) Server {
-	handler := NewHandlerBasedOnMap()
+	handler := NewHandlerBasedOnTree()
 	root := handler.ServeHTTP
 	return &miniHTTPServer{
 		Name:    name,
