@@ -6,13 +6,35 @@ import (
 	"testing"
 )
 
+func testRoute(r Routable) {
+	r.Route("GET", "/", nil)
+	r.Route("GET", "/hello/:name", nil)
+	r.Route("GET", "/a/b/c", nil)
+	r.Route("GET", "/assets/*filepath", nil)
+}
+
 func newTestTreeRouter() *HandlerBasedOnTree {
 	t := NewHandlerBasedOnTree()
-	t.Route("GET", "/", nil)
-	t.Route("GET", "/hello/:name", nil)
-	t.Route("GET", "/a/b/c", nil)
-	t.Route("GET", "/assets/*filepath", nil)
+	testRoute(t)
 	return t
+}
+
+func newTestGroupRouter() []*RouterGroup {
+	s := NewMiniHTTPServer("alice")
+	v1 := s.Group("/v1")
+	testRoute(v1)
+	v2 := v1.Group("/v2")
+	{
+		v2.Route("POST", "/login", nil)
+	}
+	return []*RouterGroup{v1, v2}
+}
+
+func TestNestedGroup(t *testing.T) {
+	vs := newTestGroupRouter()
+	if vs[1].prefix != "/v1/v2" {
+		t.Fatal("v2 prefix should be /v1/v2")
+	}
 }
 
 func TestParsePattern(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 
 // 对 Server 行为的抽象
 type Server interface {
+	Group(prefix string) *RouterGroup
 	Start(address string) error
-	Route(method, path string, handler HandlerFunc)
 }
 
 // 对 Server 的一种实现
@@ -18,11 +18,8 @@ type miniHTTPServer struct {
 	handler Handler
 	// http 请求处理链
 	root HandlerFunc
-}
-
-func (s *miniHTTPServer) Route(method, pattern string, handlerFunc HandlerFunc) {
-	// 代理到 Route 实现
-	s.handler.Route(method, pattern, handlerFunc)
+	*RouterGroup
+	groups []*RouterGroup
 }
 
 func (s *miniHTTPServer) Start(address string) error {
@@ -38,9 +35,11 @@ func (s *miniHTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewMiniHTTPServer(name string) Server {
 	handler := NewHandlerBasedOnTree()
 	root := handler.ServeHTTP
-	return &miniHTTPServer{
+	server := &miniHTTPServer{
 		Name:    name,
 		handler: handler,
 		root:    root,
 	}
+	server.RouterGroup = &RouterGroup{server: server}
+	return server
 }
